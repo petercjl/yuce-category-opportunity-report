@@ -268,7 +268,7 @@ async function runScript(name, args) {
   const binary = name.endsWith('.py') ? await resolvePython() : process.execPath;
   if (!binary) throw error('RUNTIME_UNAVAILABLE', 'Python with required packages is unavailable; run doctor --json');
   const scriptPath = path.join(SOURCE, 'scripts', name);
-  const result = spawnSync(binary, binary === 'py' ? ['-3', scriptPath, ...args] : [scriptPath, ...args], { stdio: 'inherit' });
+  const result = spawnSync(binary, binary === 'py' ? ['-3', scriptPath, ...args] : [scriptPath, ...args], { stdio: 'inherit', env: {...process.env, PYTHONUTF8:'1', PYTHONIOENCODING:'utf-8'} });
   if (result.error) throw error('RUNTIME_UNAVAILABLE', result.error.message);
   process.exitCode = result.status ?? 1;
 }

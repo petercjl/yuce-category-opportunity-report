@@ -124,16 +124,16 @@ class BuildReportTests(unittest.TestCase):
     def test_zero_market_renders_three_empty_routes(self):
         sources = self.sources()
         for source in sources:
-            data = json.loads(source.read_text())
+            data = json.loads(source.read_text(encoding="utf-8"))
             for row in data["rows"]:
                 row["transactionAmount"] = 0
-            source.write_text(json.dumps(data))
+            source.write_text(json.dumps(data), encoding="utf-8")
         result = self.run_report(sources)
         self.assertEqual(result.returncode, 0, result.stderr)
-        data = json.loads((self.root / "analysis.json").read_text())
+        data = json.loads((self.root / "analysis.json").read_text(encoding="utf-8"))
         self.assertEqual([r["poolCount"] for r in data["marketRoutes"]["routes"]], [0, 0, 0])
         self.assertEqual(data["candidatePaths"], [])
-        report = (self.root / "report.html").read_text()
+        report = (self.root / "report.html").read_text(encoding="utf-8")
         for label in ("大市场增量型", "中等容量持续增长型", "中小容量成长型"):
             self.assertIn(label, report)
 
@@ -141,7 +141,7 @@ class BuildReportTests(unittest.TestCase):
         first, second, _ = self.sources()
         result = self.run_report([first, second])
         self.assertEqual(result.returncode, 0, result.stderr)
-        data = json.loads((self.root / "analysis.json").read_text())
+        data = json.loads((self.root / "analysis.json").read_text(encoding="utf-8"))
         self.assertEqual(data["candidatePaths"], [])
         self.assertEqual(len(data["marketRoutes"]["routes"]), 3)
 
@@ -164,7 +164,7 @@ class BuildReportTests(unittest.TestCase):
             "--analysis-out", str(self.root / "analysis.json"),
             "--html-out", str(self.root / "report.html")], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
-        data = json.loads((self.root / "analysis.json").read_text())
+        data = json.loads((self.root / "analysis.json").read_text(encoding="utf-8"))
         self.assertEqual(data["marketRoutes"]["policy"]["capacityQuantiles"], [0.3, 0.65, 0.85])
         self.assertEqual(len(data["marketRoutes"]["routes"]), 3)
         self.assertEqual(data["decisionMode"], "reviewed-relative-routes")
